@@ -1,0 +1,23 @@
+#the mod name as displayed in-game
+name: "multi-crafter-lib"
+
+#the internal name of your mod
+displayName: "MultiCrafter 库"
+
+#your name
+author: "LS"
+
+#the fully qualified main class of the mod
+main: "MultiCraft.MultiCrafterMod"
+
+#the mod description as seen in the mod dialog
+description: "多配方工厂"
+
+#the mod version
+version: 1.0
+
+#the minimum game build required to run this mod
+minGameVersion: 154
+
+#this is a java mod
+java: true

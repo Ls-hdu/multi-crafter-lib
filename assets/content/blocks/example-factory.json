@@ -1,0 +1,181 @@
+{
+  "type": "MultiCraft.MultiCrafter",
+  "name": "example-factory",
+  "localizedName": "示例多合成工厂",
+  "description": "支持多种配方的测试工厂",
+  "size": 3,
+  "health": 500,
+  "itemCapacity": 60,
+  "liquidCapacity": 40,
+  "payloadCapacity" : 3,
+  "requirements": [
+    { "item": "copper", "amount": 100 },
+    { "item": "lead", "amount": 80 },
+    { "item": "silicon", "amount": 40 }
+  ],
+  "category": "crafting",
+  "drawer": { "type": "DrawDefault" },
+  "recipe": [
+    {
+      "inputItems": [
+        { "item": "copper", "amount": 3 }
+      ],
+      "outputItems": [
+        { "item": "lead", "amount": 1 }
+      ],
+      "craftTime": 90
+    },
+    {
+      "inputItems": [
+        { "item": "silicon", "amount": 2 },
+        { "item": "titanium", "amount": 1 }
+      ],
+      "inputLiquids": [
+        { "liquid": "water", "amount": 0.2 }
+      ],
+      "inputPower": 3.0,
+      "inputHeat": 80,
+      "outputItems": [
+        { "item": "surge-alloy", "amount": 1 }
+      ],
+      "outputLiquids": [
+        { "liquid": "slag", "amount": 0.1 }
+      ],
+      "outputPower": 0,
+      "outputHeat": 30,
+      "craftTime": 120,
+      "inputPayloads": [
+        "graphite-press/1"
+      ],
+      "outputPayloads": [
+        "multi-press/1"
+      ],
+      "visual": {
+        "type": "DrawRegion",
+        "suffix": "-spinner",
+        "rotateSpeed": 8
+
+      }
+    },
+    {
+      "inputItems": [
+        { "item": "silicon", "amount": 2 },
+        { "item": "titanium", "amount": 1 }
+      ],
+      "inputLiquids": [
+        { "liquid": "water", "amount": 0.2 }
+      ],
+      "inputPower": 3.0,
+      "inputHeat": 80,
+      "outputItems": [
+      { "item": "surge-alloy", "amount": 16 }
+    ],
+
+      "outputLiquids": [
+        { "liquid": "slag", "amount": 0.1 },
+        { "liquid": "hydrogen", "amount": 0.1 },
+        { "liquid": "water", "amount": 0.1 }
+      ],
+      "outputPower": 0,
+      "outputHeat": 30,
+      "craftTime": 20,
+
+      "visual": {
+        "type": "DrawRegion",
+        "suffix": "-spinner",
+        "rotateSpeed": -8
+
+      }
+    },
+    {
+      "inputItems": [
+        { "item": "silicon", "amount": 2 },
+        { "item": "titanium", "amount": 1 }
+      ],
+      "inputLiquids": [
+        { "liquid": "water", "amount": 0.2 }
+      ],
+      "inputPower": 3.0,
+      "inputHeat": 80,
+      "outputItems": [
+        { "item": "surge-alloy", "amount": 3 }
+      ],
+
+      "outputLiquids": [
+        { "liquid": "slag", "amount": 0.1 },
+        { "liquid": "hydrogen", "amount": 0.1 }
+
+      ],
+      "outputPower": 0,
+      "outputHeat": 30,
+      "craftTime": 135,
+
+      "visual": {
+        "type": "DrawRegion",
+        "suffix": "-spinner",
+        "rotateSpeed": -8
+
+      }
+    },
+    {
+      "inputItems": [
+        { "item": "silicon", "amount": 2 },
+        { "item": "titanium", "amount": 1 }
+      ],
+      "inputLiquids": [
+        { "liquid": "water", "amount": 0.2 }
+      ],
+      "inputPower": 3.0,
+      "inputHeat": 80,
+      "outputItems": [
+        { "item": "surge-alloy", "amount": 3 }
+      ],
+
+      "outputLiquids": [
+        { "liquid": "slag", "amount": 0.2 },
+        { "liquid": "hydrogen", "amount": 0.1 }
+
+      ],
+      "outputPower": 0,
+      "outputHeat": 30,
+      "craftTime": 135,
+
+      "visual": {
+        "type": "DrawRegion",
+        "suffix": "-spinner",
+        "rotateSpeed": -8
+
+      }
+    },
+    {
+      "inputItems": [
+        { "item": "silicon", "amount": 2 },
+        { "item": "titanium", "amount": 1 }
+      ],
+      "inputLiquids": [
+        { "liquid": "water", "amount": 0.2 }
+      ],
+      "inputPower": 3.0,
+      "inputHeat": 80,
+      "outputItems": [
+        { "item": "surge-alloy", "amount": 3 }
+      ],
+
+      "outputLiquids": [
+        { "liquid": "slag", "amount": 0.1 },
+        { "liquid": "hydrogen", "amount": 0.2 }
+
+      ],
+      "outputPower": 0,
+      "outputHeat": 30,
+      "craftTime": 135,
+
+      "visual": {
+        "type": "DrawRegion",
+        "suffix": "-spinner",
+        "rotateSpeed": -8
+
+      }
+    }
+  ]
+}
