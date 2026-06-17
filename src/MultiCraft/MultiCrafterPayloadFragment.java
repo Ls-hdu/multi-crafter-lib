@@ -1,6 +1,5 @@
 package MultiCraft;
 
-import MultiCraft.MultiCrafter;
 import arc.func.Prov;
 import arc.graphics.g2d.TextureRegion;
 import arc.scene.Element;
@@ -9,7 +8,6 @@ import arc.scene.event.Touchable;
 import arc.scene.ui.Image;
 import arc.scene.ui.layout.Stack;
 import arc.scene.ui.layout.Table;
-import arc.struct.IntMap;
 import arc.util.Align;
 import arc.util.Log;
 import arc.util.Reflect;
@@ -17,11 +15,9 @@ import mindustry.core.UI;
 import mindustry.ctype.UnlockableContent;
 import mindustry.gen.Building;
 import mindustry.gen.Tex;
-import mindustry.world.Block;
-import mindustry.type.UnitType;
+import mindustry.type.PayloadSeq;
 
 import static mindustry.Vars.control;
-import static mindustry.Vars.content;
 import static mindustry.Vars.ui;
 
 public class MultiCrafterPayloadFragment {
@@ -54,23 +50,16 @@ public class MultiCrafterPayloadFragment {
                 && build.block instanceof MultiCrafter mc
                 && mc.hasPayloads) {
 
-
-            boolean hasAny = false;
-
-            for (IntMap.Entry<Integer> entry : build.payloadCounts.entries()) {
-                UnlockableContent c = content.block(entry.key);
-                if (c == null) c = content.unit(entry.key);
-                if (c == null) continue;
-
-                int count = entry.value;
-                if (count <= 0) continue;
-
-                table.add(itemImage(c.uiIcon, () -> round(count)));
-                if (row++ % cols == cols - 1) table.row();
-                hasAny = true;
-            }
-
-            if (!hasAny) {
+            PayloadSeq payloads = build.getPayloads();
+            if (payloads != null && !payloads.isEmpty()) {
+                for (UnlockableContent content : MultiCrafter.MultiCrafterBuild.allPayloadTypes) {
+                    if (!payloads.contains(content)) continue;
+                    int amount = payloads.get(content);
+                    if (amount <= 0) continue;
+                    table.add(itemImage(content.uiIcon, () -> round(amount)));
+                    if (row++ % cols == cols - 1) table.row();
+                }
+            } else {
                 table.visible = false;
             }
         } else {
@@ -81,33 +70,21 @@ public class MultiCrafterPayloadFragment {
     }
 
     private Building getBuild() {
-        try {
-            return Reflect.get(control.input.inv, "build");
-        } catch (Exception e) {
-            Log.err(e);
-            return null;
-        }
+        try { return Reflect.get(control.input.inv, "build"); }
+        catch (Exception e) { Log.err(e); return null; }
     }
 
     private String round(float f) {
         f = (int) f;
-        if (f >= 1000000) {
-            return (int) (f / 1000000f) + "[gray]" + UI.millions;
-        } else if (f >= 1000) {
-            return (int) (f / 1000) + UI.thousands;
-        } else {
-            return (int) f + "";
-        }
+        if (f >= 1000000) return (int)(f/1000000f) + "[gray]" + UI.millions;
+        else if (f >= 1000) return (int)(f/1000) + UI.thousands;
+        else return (int)f + "";
     }
 
     private void updateTablePosition() {
         table.pack();
-        if (itemInvRef == null) {
-            itemInvRef = ui.hudGroup.find("inventory");
-        }
-        if (itemInvRef != null) {
-            table.setPosition(itemInvRef.x, itemInvRef.y + itemInvRef.getPrefHeight() - 4, Align.bottomLeft);
-        }
+        if (itemInvRef == null) itemInvRef = ui.hudGroup.find("inventory");
+        if (itemInvRef != null) table.setPosition(itemInvRef.x, itemInvRef.y + itemInvRef.getPrefHeight() - 4, Align.bottomLeft);
     }
 
     private Element itemImage(TextureRegion region, Prov<CharSequence> text) {

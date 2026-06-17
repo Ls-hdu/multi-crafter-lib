@@ -176,6 +176,30 @@
         "rotateSpeed": -8
 
       }
+
+    },
+    {
+      "inputHeat": 80,
+      "maxEfficiency": 2.0,
+      "outputItems": [{"item": "surge-alloy", "amount": 1}],
+      "craftEffect": "unitControl",
+      "updateEffect": "unitEnvKill",
+      "switchEffect": "unitCapKill",
+      "craftSound": "boom",
+      "updateSound": "pulse",
+      "updateEffectChance": 0.2
+
+    },
+    {
+      "inputHeat": 120,
+      "maxEfficiency": 8.0,
+      "outputItems": [{"item": "titanium", "amount": 2}],
+      "craftEffect" : "smeltsmoke",
+      "updateEffect": "trailFade",
+      "switchEffect": "unitSpawn",
+      "craftSound": "boom",
+      "updateSound": "pulse",
+      "updateEffectChance": 0.01
     }
   ]
 }

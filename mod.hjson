@@ -14,7 +14,7 @@ main: "MultiCraft.MultiCrafterMod"
 description: "多配方工厂"
 
 #the mod version
-version: 1.0
+version: "1.0.0"
 
 #the minimum game build required to run this mod
 minGameVersion: 154

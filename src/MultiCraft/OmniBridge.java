@@ -36,9 +36,10 @@ public class OmniBridge extends ItemBridge {
 
 
     public TextureRegion topRegion;
-    private static int currentFindX, currentFindY;
-    private static BuildPlan currentPlan;
-    private static final Boolf<BuildPlan> planFinder = other ->
+    protected static int currentFindX;
+    protected static int currentFindY;
+    protected static BuildPlan currentPlan;
+    protected static final Boolf<BuildPlan> planFinder = other ->
             other.block == currentPlan.block && currentPlan != other && currentFindX == other.x && currentFindY == other.y;
 
 
