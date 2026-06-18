@@ -753,6 +753,7 @@ public class MultiCrafter extends HeatCrafter {
         public @Nullable Payload outputPayload;
         public Vec2 outPayVector = new Vec2();
         public float outPayRotation;
+        public int payloadDumpIndex = 0;//输出方向
 
         public float time, speedScl;
         public @Nullable Vec2 commandPos;
@@ -1566,6 +1567,22 @@ public class MultiCrafter extends HeatCrafter {
             }
         }
 
+        @Override
+        public boolean dumpPayload(Payload todump) {
+            if (proximity.size == 0) return false;
+            int start = payloadDumpIndex % proximity.size;
+            for (int i = 0; i < proximity.size; i++) {
+                int idx = (start + i) % proximity.size;
+                Building other = proximity.get(idx);
+                if (todump != null && other.acceptPayload(this, todump)) {
+                    other.handlePayload(this, todump);
+                    payloadDumpIndex = (idx + 1) % proximity.size;
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private Payload createPayload(UnlockableContent c) {
             if (c instanceof Block b) return new BuildPayload(b, team);
             else if (c instanceof UnitType u) return new UnitPayload(u.create(team));
@@ -1701,7 +1718,7 @@ public class MultiCrafter extends HeatCrafter {
 
         @Override
         public byte version() {
-            return 2;
+            return 3;
         }
 
         @Override
@@ -1737,6 +1754,8 @@ public class MultiCrafter extends HeatCrafter {
             TypeIO.writeCommand(w, command);
             w.f(attrsum);
             w.i(seed);
+            w.i(payloadDumpIndex);
+
         }
 
         @Override
@@ -1784,9 +1803,15 @@ public class MultiCrafter extends HeatCrafter {
                 if (rev >= 2) {
                     attrsum = r.f();
                     seed = r.i();
+                    if (rev >= 3) {
+                        payloadDumpIndex = r.i();
+                    } else {
+                        payloadDumpIndex = 0;
+                    }
                 } else {
                     attrsum = 0f;
                     seed = 0;
+                    payloadDumpIndex = 0;
                 }
             } else {
                 int idx = r.i();
@@ -1800,6 +1825,7 @@ public class MultiCrafter extends HeatCrafter {
                 command = null;
                 attrsum = 0f;
                 seed = 0;
+                payloadDumpIndex = 0;
             }
 
             syncLiquidOutputs();
