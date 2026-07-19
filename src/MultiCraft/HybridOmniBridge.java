@@ -216,9 +216,6 @@ public class HybridOmniBridge extends OmniBridge {
             }
         }
 
-        @Override
-        public void updateTile() {
-            super.updateTile();
-        }
+
     }
 }

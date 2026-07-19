@@ -1,0 +1,17 @@
+{
+  "type": "MultiCraft.ImprovedUnloader",
+  "name": "improved-unloader",
+  "localizedName": "改进装卸器",
+  "description": "运输能力不随帧率下降的装卸器",
+  "category": "distribution",
+  "requirements": [
+    "copper/3"
+  ],
+  "buildVisibility": "shown",
+  "health": 120,
+  "size": 1,
+  "speed" : 0.5
+
+
+
+}

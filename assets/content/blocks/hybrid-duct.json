@@ -1,0 +1,19 @@
+{
+  "type": "MultiCraft.HybridDuct",
+  "name": "hybrid-duct",
+  "localizedName": "json固液双用导轨",
+  "description": "同时运输物品和液体",
+  "category": "distribution",
+  "requirements": [
+    "copper/30"
+  ],
+  "buildVisibility": "shown",
+  "health": 120,
+  "size": 1,
+  "range": 8,
+  "speed" : 0.5,
+  "itemCapacity": 15,
+  "liquidCapacity": 20
+
+
+}

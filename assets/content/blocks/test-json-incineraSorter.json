@@ -1,0 +1,13 @@
+{
+  "type": "MultiCraft.IncineratingSorter",
+  "name": "json示例焚化反分器",
+  "invert" : true,
+  "itemCapacity":10,
+  "haspower": true,
+  "size": 1,
+  "category": "distribution",
+  "requirements": [ "copper/1" ],
+  "consumes": {
+    "power": 1.5
+  }
+}

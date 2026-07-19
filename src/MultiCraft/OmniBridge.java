@@ -18,6 +18,7 @@ import mindustry.graphics.Drawf;
 import mindustry.graphics.Layer;
 import mindustry.graphics.Pal;
 import mindustry.input.Placement;
+import mindustry.type.Item;
 import mindustry.world.Tile;
 import mindustry.world.blocks.distribution.ItemBridge;
 import mindustry.world.meta.Stat;
@@ -29,7 +30,7 @@ import static mindustry.Vars.world;
 
 public class OmniBridge extends ItemBridge {
     public int range;
-    public float speed = 30f;
+
     public float bridgeWidth = 8f;
     public float arrowTimeScl = 1.5f;
     public float arrowPeriod = 1.5f;
@@ -50,12 +51,7 @@ public class OmniBridge extends ItemBridge {
 
     }
 
-    @Override
-    public void init() {
-        super.init();
 
-        transportTime = 60f / speed;
-    }
 
 
 
@@ -363,7 +359,7 @@ public class OmniBridge extends ItemBridge {
             Lines.square(ox, oy, 2f, 45f);
             Draw.mixcol(color);
             Draw.color();
-            float angle = Angles.angle(tx, ty, ox, oy);
+            float angle = isOutput ? Angles.angle(tx, ty, ox, oy) : Angles.angle(tx, ty, ox, oy) +180;
             Draw.rect(arrowRegion, x, y, angle);
             Draw.mixcol();
         }

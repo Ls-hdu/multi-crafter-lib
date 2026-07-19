@@ -200,6 +200,52 @@
       "craftSound": "boom",
       "updateSound": "pulse",
       "updateEffectChance": 0.01
+    },
+    {
+      "inputItems": [{"item": "graphite", "amount": 1}],
+      "inputLiquids": [],
+      "inputPower": 0,
+      "inputHeat": 0,
+      "outputItems": [],
+      "outputLiquids": [
+        {"liquid": "cryofluid", "amount": 0.15},
+        {"liquid": "neoplasm", "amount": 0.05},
+        {"liquid": "arkycite", "amount": 0.1}
+      ],
+      "liquidOutputDirections": [-1, -1, -1],
+      "outputPower": 0,
+      "outputHeat": 0,
+      "craftTime": 40,
+      "craftEffect": "shockwave",
+      "updateEffect": "steam"
+    },{
+      "inputItems": [{"item": "copper", "amount": 4}],
+      "outputItems": [{"item": "silicon", "amount": 2}],
+      "craftTime": 50,
+      "alwaysUnlocked": false,
+      "parent": "json-test-multi-crafter",
+      "researchCost": [
+        {"item": "copper", "amount": 30},
+        {"item": "lead", "amount": 40}
+      ]
+    },{
+      "inputItems": [{"item": "lead", "amount": 3}],
+      "outputItems": [{"item": "graphite", "amount": 3}],
+      "craftTime": 40,
+      "alwaysUnlocked": false
+    },
+    {
+      "inputItems": [{"item": "lead", "amount": 1}],
+      "inputLiquids": [],
+      "inputPower": 0,
+      "inputHeat": 0,
+      "outputItems": [{"item": "graphite", "amount": 2}],
+      "outputLiquids": [],
+      "outputPower": 0,
+      "outputHeat": 0,
+      "craftTime": 45,
+      "inputPayloads": ["graphite-press/1"],
+      "outputPayloads": ["dagger/1"]
     }
   ]
 }
