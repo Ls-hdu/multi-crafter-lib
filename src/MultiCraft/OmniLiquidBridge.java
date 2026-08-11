@@ -28,6 +28,10 @@ public class OmniLiquidBridge extends OmniBridge {
 
     public class OmniLiquidBridgeBuild extends OmniBridgeBuild {
 
+        @Override
+        public void updateTile() {
+
+        }
 
         @Override
         public void updateTransport(Building other) {

@@ -119,7 +119,7 @@ public class HybridDuct extends Duct {
         }
 
 
-        @Override
+
         protected void drawAt(float x, float y, int bits, float rotation, SliceMode slice){
             Draw.z(Layer.blockUnder + 0.2f);
             Draw.rect(sliced(topRegions[bits], slice), x, y, rotation);
