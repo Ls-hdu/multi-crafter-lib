@@ -1,12 +1,14 @@
 package MultiCraft;
 
 import arc.graphics.g2d.Draw;
+import arc.graphics.g2d.TextureRegion;
 import arc.math.Mathf;
 
 import arc.math.geom.Geometry;
 import arc.util.Tmp;
 
 import mindustry.gen.Building;
+import mindustry.graphics.Drawf;
 import mindustry.graphics.Layer;
 import mindustry.type.Category;
 import mindustry.type.ItemStack;
@@ -15,8 +17,7 @@ import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.blocks.distribution.Duct;
 
-import static mindustry.Vars.itemSize;
-import static mindustry.Vars.tilesize;
+import static mindustry.Vars.*;
 
 
 public class HybridDuct extends Duct {
@@ -63,7 +64,7 @@ public class HybridDuct extends Duct {
 
 
             super.updateTile();
-
+            smoothLiquid = Mathf.lerpDelta(smoothLiquid, liquids.currentAmount() / liquidCapacity, 0.05f);
             if (liquids.currentAmount() > 0.0001f && timer(timerFlow, 1)) {
                 moveLiquidForward(leaks, liquids.current());
             }
@@ -75,54 +76,16 @@ public class HybridDuct extends Duct {
                 noSleep();
             }
         }
-
         @Override
-        public void draw() {
-            float rotation = rotdeg();
-            int r = this.rotation;
-
-
-            for(int i = 0; i < 4; i++){
-                if((blending & (1 << i)) != 0){
-                    int dir = r - i;
-                    float rot = i == 0 ? rotation : (dir)*90;
-                    drawAt(x + Geometry.d4x(dir) * tilesize*0.75f,
-                            y + Geometry.d4y(dir) * tilesize*0.75f,
-                            0, rot, i != 0 ? SliceMode.bottom : SliceMode.top);
-                }
+        public void draw(boolean under) {
+            if (!under && smoothLiquid > 0.001f && liquids.currentAmount() > 0.001f) {
+                Liquid liq = liquids.current();
+                TextureRegion liquidr = renderer.fluidFrames[liq.gas ? 1 : 0][liq.getAnimationFrame()];
+                Draw.z(Layer.blockUnder + 0.15f);
+                Drawf.liquid(liquidr, x, y, smoothLiquid, liq.color);
             }
 
-            if(current != null){
-                Draw.z(Layer.blockUnder + 0.1f);
-                Tmp.v1.set(Geometry.d4x(recDir) * tilesize / 2f, Geometry.d4y(recDir) * tilesize / 2f)
-                        .lerp(Geometry.d4x(r) * tilesize / 2f, Geometry.d4y(r) * tilesize / 2f,
-                                Mathf.clamp((progress + 1f) / (2f - 1f/speed)));
-                Draw.rect(current.fullIcon, x + Tmp.v1.x, y + Tmp.v1.y, itemSize, itemSize);
-            }
-
-
-            Draw.scl(xscl, yscl);
-
-
-            if(liquids.currentAmount() > 0.001f){
-                Draw.z(Layer.blockUnder + 0.05f);
-                Draw.color(liquids.current().color);
-                Draw.alpha(smoothLiquid * 0.8f);
-                Draw.rect(botRegions[blendbits], x, y, rotation);
-                Draw.color();
-            }
-
-            Draw.z(Layer.blockUnder + 0.2f);
-            Draw.rect(topRegions[blendbits], x, y, rotation);
-
-            Draw.reset();
-        }
-
-
-
-        protected void drawAt(float x, float y, int bits, float rotation, SliceMode slice){
-            Draw.z(Layer.blockUnder + 0.2f);
-            Draw.rect(sliced(topRegions[bits], slice), x, y, rotation);
+            super.draw(under);
         }
 
 
