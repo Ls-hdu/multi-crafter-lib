@@ -11,7 +11,7 @@ author: "LS"
 main: "MultiCraft.MultiCrafterMod"
 
 #the mod description as seen in the mod dialog
-description: "多配方工厂\n\n[accent[]]特别感谢名单：\n[accent[]]Special thanks:\n\n[accent[]]·悠闲的小凡[white[]]（拉进交流群、参与测试等）\n[accent[]]·火星人076[white[]]（大量工作，包括但不限于测试，实现思路提供等）\n[accent[]]·Momiji142857[white[]]（代码参考，部分思路来源）\n[accent[]]·AErvela[white[]]（代码参考，部分思路来源）\n[accent[]]·Editors of Mindustry Unofficial Fandom Wiki[white[]]（Mindustry Lore）\n[accent[]]·所有参与测试、提出建议和汇报错误的网友们\n\n\n[accent[]]模组游玩反馈说明：\n[accent[]]Feedback instructions:\n\n[white[]]"
+description: "多配方工厂\n\n[accent[]]特别感谢名单：\n[accent[]]Special thanks:\n\n[accent[]]·悠闲的小凡[white[]]（拉进交流群、参与测试等）\n[accent[]]·火星人076[white[]]（大量工作，包括但不限于测试，实现思路提供等）\n[accent[]]·Momiji142857[white[]]（代码参考，部分思路来源）\n[accent[]]·AErvela[white[]]（代码参考，部分思路来源）\n[accent[]]·所有参与测试、提出建议和汇报错误的网友们\n\n\n[accent[]]"
 
 #the mod version
 version: "1.0.3"
