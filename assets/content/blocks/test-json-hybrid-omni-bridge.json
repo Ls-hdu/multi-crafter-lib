@@ -1,8 +1,6 @@
 {
   "type": "MultiCraft.HybridOmniBridge",
   "name": "test-json-hybrid-omni-bridge",
-  "localizedName": "json全方向固液双用桥",
-  "description": "同时运输物品和液体，可向任意方向连接。",
   "category": "distribution",
   "requirements": [
     "copper/30",

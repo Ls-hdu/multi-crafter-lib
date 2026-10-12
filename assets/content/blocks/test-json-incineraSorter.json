@@ -1,6 +1,6 @@
 {
   "type": "MultiCraft.IncineratingSorter",
-  "name": "json示例焚化反分器",
+  "name": "test-json-incineraSorter",
   "invert" : true,
   "itemCapacity":10,
   "haspower": true,

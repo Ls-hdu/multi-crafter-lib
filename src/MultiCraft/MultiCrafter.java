@@ -57,7 +57,6 @@ import static mindustry.Vars.*;
 
 
 import static mindustry.Vars.content;
-import static mindustry.graphics.Pal.command;
 
 public class MultiCrafter extends HeatCrafter {
     public Seq<Recipe> recipes = new Seq<>();
@@ -534,7 +533,7 @@ public class MultiCrafter extends HeatCrafter {
                         return;  // 只显示锁
                     }
 
-                    String title = "[accent]Recipe " + (idx + 1) + "[]";
+                    String title = "[accent]" + Core.bundle.get("stat.recipe") + (idx + 1) + "[]";
                     t.add(title).padTop(4).padBottom(4);
                     t.row();
                     boolean hasInput = rec.inputItems.length > 0 || rec.inputLiquids.length > 0

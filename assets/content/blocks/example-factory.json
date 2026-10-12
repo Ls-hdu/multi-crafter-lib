@@ -1,8 +1,6 @@
 {
   "type": "MultiCraft.MultiCrafter",
   "name": "example-factory",
-  "localizedName": "示例多合成工厂",
-  "description": "支持多种配方的测试工厂",
   "size": 3,
   "health": 500,
   "itemCapacity": 60,
