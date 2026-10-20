@@ -52,6 +52,7 @@ import mindustry.world.draw.DrawBlock;
 import mindustry.world.meta.*;
 import mindustry.mod.Mods.*;
 
+
 import static MultiCraft.MultiCrafter.MultiCrafterBuild.allPayloadTypes;
 import static mindustry.Vars.*;
 
@@ -333,9 +334,9 @@ public class MultiCrafter extends HeatCrafter {
             boolean forced = rec.alwaysUnlocked != null;
             boolean hasUnlockConditions;
             if (forced) {
-                hasUnlockConditions = !rec.alwaysUnlocked; // false 表示需要解锁
+                hasUnlockConditions = !rec.alwaysUnlocked;
             } else {
-                hasUnlockConditions = rec.parent != null || rec.objectives.any();
+                hasUnlockConditions = rec.research != null || rec.objectives.any();
             }
 
             String blockName = name + "-recipe-" + i;
@@ -347,23 +348,12 @@ public class MultiCrafter extends HeatCrafter {
                 continue;
             }
 
-            Block block = new Block(blockName) {
-                {
-                    placeablePlayer = false;
-                    buildVisibility = BuildVisibility.sandboxOnly;
-                    requirements = ItemStack.empty;
-                    alwaysUnlocked = !hasUnlockConditions;
-                    databaseCategory = rec.databaseCategory != null ? rec.databaseCategory : "recipe";
-                    databaseTag = rec.databaseTag != null ? rec.databaseTag : "default";
-                }
-
-                @Override
-                public boolean isHidden() {
-                    return false; // 所有配方在数据库中可见
-                }
-            };
+            RecipeBlock block = new RecipeBlock(blockName, i);
+            block.alwaysUnlocked = !hasUnlockConditions;
+            block.databaseCategory = rec.databaseCategory != null ? rec.databaseCategory : "recipe";
+            block.databaseTag = rec.databaseTag != null ? rec.databaseTag : "default";
             block.minfo.mod = minfo.mod;
-            block.localizedName = localizedName + " Recipe " + (i + 1);
+            block.localizedName = localizedName + Core.bundle.get("stat.recipe") + (i + 1);
 
             rec.unlockBlock = block;
 
@@ -378,6 +368,36 @@ public class MultiCrafter extends HeatCrafter {
         consumesPower = consPower != null;
 
 
+    }
+
+    public class RecipeBlock extends Block {
+        public final int recipeIndex;
+
+        public RecipeBlock(String name, int recipeIndex) {
+            super(name);
+            this.recipeIndex = recipeIndex;
+
+            placeablePlayer = false;
+            buildVisibility = BuildVisibility.shown;
+            requirements = ItemStack.empty;
+            inEditor = false;
+            databaseCategory = "recipe";
+            databaseTag = "default";
+        }
+
+        @Override
+        public boolean isHidden() {
+            return false;
+        }
+
+
+
+        @Override
+        public void setStats() {
+            if (recipeIndex >= 0 && recipeIndex < recipes.size) {
+                addRecipeStats(stats, recipes.get(recipeIndex), recipeIndex, false);
+            }
+        }
     }
 
     @Override
@@ -396,71 +416,47 @@ public class MultiCrafter extends HeatCrafter {
         for (int i = 0; i < recipes.size; i++) {
             Recipe rec = recipes.get(i);
 
-            // 判断是否需要解锁节点（与 init 中保持一致）
             boolean forced = rec.alwaysUnlocked != null;
             boolean hasUnlockConditions;
             if (forced) {
                 hasUnlockConditions = !rec.alwaysUnlocked;
             } else {
-                hasUnlockConditions = rec.parent != null || rec.objectives.any();
+                hasUnlockConditions = rec.research != null || rec.objectives.any();
             }
 
             if (rec.unlockBlock == null || !hasUnlockConditions) continue;
-            // 防止重复节点
             if (rec.unlockBlock.techNode != null) continue;
 
-            TechTree.TechNode node = new TechTree.TechNode(null, rec.unlockBlock, ItemStack.empty);
+            ItemStack[] reqs = (rec.research != null && rec.research.requirements != null)
+                    ? rec.research.requirements
+                    : ItemStack.empty;
+
+            TechTree.TechNode node = new TechTree.TechNode(null, rec.unlockBlock, reqs);
             node.objectives.addAll(rec.objectives);
 
-            // 如果没有自定义 objective 且没有 parent，但用户显式设置了 alwaysUnlocked = false，
-            // 则自动添加所有输入输出物品/液体/载荷为 Research 目标
-            if (rec.objectives.isEmpty() && rec.parent == null && forced && !rec.alwaysUnlocked) {
+            if (rec.objectives.isEmpty()
+                    && rec.research == null
+                    && forced
+                    && !rec.alwaysUnlocked) {
                 ObjectSet<UnlockableContent> allContent = new ObjectSet<>();
-                // 输入物品
-                for (ItemStack stack : rec.inputItems) allContent.add(stack.item);
-                // 输出物品
-                for (ItemStack stack : rec.outputItems) allContent.add(stack.item);
-                // 输入液体
-                for (LiquidStack stack : rec.inputLiquids) allContent.add(stack.liquid);
-                // 输出液体
-                for (LiquidStack stack : rec.outputLiquids) allContent.add(stack.liquid);
-                // 载荷（输入输出）
-                if (rec.cachedInputPayloads != null)
-                    for (PayloadStack stack : rec.cachedInputPayloads)
-                        if (stack.item != null) allContent.add(stack.item);
-                if (rec.cachedOutputPayloads != null)
-                    for (PayloadStack stack : rec.cachedOutputPayloads)
-                        if (stack.item != null) allContent.add(stack.item);
+                for (ItemStack s : rec.inputItems) if (s.item != null) allContent.add(s.item);
+                for (ItemStack s : rec.outputItems) if (s.item != null) allContent.add(s.item);
+                for (LiquidStack s : rec.inputLiquids) if (s.liquid != null) allContent.add(s.liquid);
+                for (LiquidStack s : rec.outputLiquids) if (s.liquid != null) allContent.add(s.liquid);
+                for (PayloadStack s : rec.cachedInputPayloads) if (s.item != null) allContent.add(s.item);
+                for (PayloadStack s : rec.cachedOutputPayloads) if (s.item != null) allContent.add(s.item);
 
                 for (UnlockableContent c : allContent) {
                     node.objectives.add(new Objectives.Research(c));
                 }
             }
 
-            // 挂载父节点
-            if (rec.parent != null) {
-                TechTree.TechNode parentNode = TechTree.all.find(t ->
-                        t.content.name.equals(rec.parent) ||
-                                t.content.name.equals((minfo.mod != null ? minfo.mod.name + "-" : "") + rec.parent)
-                );
-                if (parentNode != null) {
-                    parentNode.children.add(node);
-                    node.parent = parentNode;
-                    node.depth = parentNode.depth + 1;
-                    node.planet = parentNode.planet;
-                } else if (factoryNode != null) {
-                    factoryNode.children.add(node);
-                    node.parent = factoryNode;
-                    node.depth = factoryNode.depth + 1;
-                    node.planet = factoryNode.planet;
-                }
-            } else {
-                if (factoryNode != null) {
-                    factoryNode.children.add(node);
-                    node.parent = factoryNode;
-                    node.depth = factoryNode.depth + 1;
-                    node.planet = factoryNode.planet;
-                }
+
+            if (factoryNode != null) {
+                factoryNode.children.add(node);
+                node.parent = factoryNode;
+                node.depth = factoryNode.depth + 1;
+                node.planet = factoryNode.planet;
             }
 
             TechTree.all.add(node);
@@ -511,103 +507,128 @@ public class MultiCrafter extends HeatCrafter {
             table.clearChildren();
             table.left();
             for (int i = 0; i < recipes.size; i++) {
-                Recipe rec = recipes.get(i);
-                rec.ensureArrays();
-                int idx = i;
-                table.table(Styles.grayPanel, t -> {
-                    t.left().defaults().left().padLeft(4);
-
-                    Block unlock = rec.unlockBlock;
-                    boolean banned = unlock != null && unlock.isBanned();
-                    boolean locked = unlock != null && !unlock.unlockedNow();
-
-                    if (banned) {
-                        t.align(Align.center);
-                        t.image(Icon.cancel).color(Pal.remove).size(40).pad(8f).center();
-                        return;  // 只显示叉号
-                    }
-
-                    if (locked) {
-                        t.align(Align.center);
-                        t.image(Icon.lock).color(Pal.darkerGray).size(40).pad(8f).center();
-                        return;  // 只显示锁
-                    }
-
-                    String title = "[accent]" + Core.bundle.get("stat.recipe") + (idx + 1) + "[]";
-                    t.add(title).padTop(4).padBottom(4);
-                    t.row();
-                    boolean hasInput = rec.inputItems.length > 0 || rec.inputLiquids.length > 0
-                            || rec.inputPower > 0 || rec.inputHeat > 0 || rec.cachedInputPayloads.length > 0;
-                    if (hasInput) {
-                        t.table(inputRow -> {
-                            inputRow.left();
-                            inputRow.add("[lightgray]" + Core.bundle.get("stat.input") + ":[]").padRight(8);
-                            for (ItemStack s : rec.inputItems)
-                                inputRow.add(StatValues.displayItem(s.item, s.amount, rec.craftTime, true)).padRight(8);
-                            for (LiquidStack s : rec.inputLiquids)
-                                inputRow.add(StatValues.displayLiquid(s.liquid, s.amount * 60f, true)).padRight(8);
-                            for (PayloadStack s : rec.cachedInputPayloads)
-                                inputRow.table(pl -> {
-                                    pl.image(s.item.uiIcon).size(32).padRight(2);
-                                    pl.add(s.item.localizedName).color(Color.lightGray).padRight(4);
-                                    pl.add(Strings.autoFixed(s.amount / (rec.craftTime / 60f), 1) + StatUnit.perSecond.localized()).color(Color.lightGray);
-                                }).padRight(8);
-                            if (rec.inputPower > 0)
-                                inputRow.table(p -> StatValues.number(rec.inputPower * 60f, StatUnit.powerSecond).display(p)).padRight(8);
-                            if (rec.inputHeat > 0)
-                                inputRow.table(h -> StatValues.number(rec.inputHeat, StatUnit.heatUnits).display(h)).padRight(8);
-                            inputRow.row();
-                        }).left().padLeft(4);
-                        t.row();
-                    }
-                    boolean hasOutput = rec.outputItems.length > 0 || rec.outputLiquids.length > 0
-                            || rec.outputHeat > 0 || rec.outputPower > 0 || rec.cachedOutputPayloads.length > 0
-                            || rec.randomResults != null;
-                    if (hasOutput) {
-                        t.table(outputRow -> {
-                            outputRow.left();
-                            outputRow.add("[lightgray]" + Core.bundle.get("stat.output") + ":[]").padRight(8);
-                            for (ItemStack s : rec.outputItems)
-                                outputRow.add(StatValues.displayItem(s.item, s.amount, rec.craftTime, true)).padRight(8);
-                            for (LiquidStack s : rec.outputLiquids)
-                                outputRow.add(StatValues.displayLiquid(s.liquid, s.amount * 60f, true)).padRight(8);
-                            for (PayloadStack s : rec.cachedOutputPayloads)
-                                outputRow.table(pl -> {
-                                    pl.image(s.item.uiIcon).size(32).padRight(2);
-                                    pl.add(s.item.localizedName).color(Color.lightGray).padRight(4);
-                                    pl.add(Strings.autoFixed(s.amount / (rec.craftTime / 60f), 1) + StatUnit.perSecond.localized()).color(Color.lightGray);
-                                }).padRight(8);
-                            if (rec.outputPower > 0)
-                                outputRow.table(p -> StatValues.number(rec.outputPower * 60f, StatUnit.powerSecond).display(p)).padRight(8);
-                            if (rec.outputHeat > 0)
-                                outputRow.table(h -> StatValues.number(rec.outputHeat, StatUnit.heatUnits).display(h)).padRight(8);
-
-                            if (rec.randomResults != null) {
-                                float sum = 0f;
-                                for (ItemStack s : rec.randomResults) sum += s.amount;
-                                for (ItemStack stack : rec.randomResults) {
-                                    int percent = (int)(stack.amount / sum * 100);
-                                    outputRow.add(StatValues.displayItemPercent(stack.item, percent, true)).padRight(5);
-                                }
-                            }
-                        }).growX().pad(5).row();
-                    }
-                    t.row();
-                    t.table(info -> {
-                        info.left().defaults().left();
-                        info.add("[lightgray]" + Core.bundle.get("stat.productiontime") + ":[] " + Strings.autoFixed(rec.craftTime / 60f, 3) + " " + Core.bundle.get("unit.seconds")).padTop(4);
-                        if (rec.inputHeat > 0)
-                            info.add("[lightgray] "+ Core.bundle.get("stat.maxefficiency") + ": []" +Strings.autoFixed(rec.maxEfficiency * 100f, 0) + "%");
-                    }).padTop(4).left().padLeft(4);
-                    if (rec.attribute != null) {
-                        t.row();
-                        Table affTable = new Table();
-                        StatValues.blocks(rec.attribute, rec.floating, rec.boostScale * size * size, !rec.displayEfficiency).display(affTable);
-                        t.add(affTable).padLeft(4);
-                    }
-                }).growX().pad(5).row();
+                final int idx = i;
+                final Recipe rec = recipes.get(i);
+                table.table(Styles.grayPanel, t -> buildRecipeContent(t, rec, idx, true))
+                        .growX().pad(5).row();
             }
         });
+    }
+
+    public void addRecipeStats(Stats stats, Recipe rec, int idx, boolean showLockStatus) {
+        rec.ensureArrays();
+        stats.add(Stat.output, table -> {
+            table.clearChildren();
+            table.left();
+            table.table(Styles.grayPanel, t -> buildRecipeContent(t, rec, idx, showLockStatus))
+                    .growX().pad(5);
+        });
+    }
+
+    //构建单个配方的内部内容表格
+    private void buildRecipeContent(Table t, Recipe rec, int idx, boolean showLockStatus) {
+        t.left().defaults().left().padLeft(4);
+
+        //禁用/锁定状态处理
+        if (showLockStatus) {
+            Block unlock = rec.unlockBlock;
+            boolean banned = unlock != null && unlock.isBanned();
+            boolean checkLock = state.isCampaign() || !state.isGame();
+            boolean locked = checkLock && unlock != null && !unlock.unlocked();
+
+            if (banned) {
+                t.align(Align.center);
+                t.image(Icon.cancel).color(Pal.remove).size(40).pad(8f).center();
+                return; // 只显示叉号
+            }
+
+            if (locked) {
+                t.align(Align.center);
+                t.image(Icon.lock).color(Pal.darkerGray).size(40).pad(8f).center();
+                return; // 只显示锁
+            }
+        }
+
+        //配方信息
+        String title = "[accent]" + Core.bundle.get("stat.recipe") + (idx + 1) + "[]";
+        t.add(title).padTop(4).padBottom(4);
+        t.row();
+
+        boolean hasInput = rec.inputItems.length > 0 || rec.inputLiquids.length > 0
+                || rec.inputPower > 0 || rec.inputHeat > 0 || rec.cachedInputPayloads.length > 0;
+        if (hasInput) {
+            t.table(inputRow -> {
+                inputRow.left();
+                inputRow.add("[lightgray]" + Core.bundle.get("stat.input") + ":[]").padRight(8);
+                for (ItemStack s : rec.inputItems)
+                    inputRow.add(StatValues.displayItem(s.item, s.amount, rec.craftTime, true)).padRight(8);
+                for (LiquidStack s : rec.inputLiquids)
+                    inputRow.add(StatValues.displayLiquid(s.liquid, s.amount * 60f, true)).padRight(8);
+                for (PayloadStack s : rec.cachedInputPayloads)
+                    inputRow.table(pl -> {
+                        pl.image(s.item.uiIcon).size(32).padRight(2);
+                        pl.add(s.item.localizedName).color(Color.lightGray).padRight(4);
+                        pl.add(Strings.autoFixed(s.amount / (rec.craftTime / 60f), 1) + StatUnit.perSecond.localized()).color(Color.lightGray);
+                    }).padRight(8);
+                if (rec.inputPower > 0)
+                    inputRow.table(p -> StatValues.number(rec.inputPower * 60f, StatUnit.powerSecond).display(p)).padRight(8);
+                if (rec.inputHeat > 0)
+                    inputRow.table(h -> StatValues.number(rec.inputHeat, StatUnit.heatUnits).display(h)).padRight(8);
+                inputRow.row();
+            }).left().padLeft(4);
+            t.row();
+        }
+
+        boolean hasOutput = rec.outputItems.length > 0 || rec.outputLiquids.length > 0
+                || rec.outputHeat > 0 || rec.outputPower > 0 || rec.cachedOutputPayloads.length > 0
+                || rec.randomResults != null;
+        if (hasOutput) {
+            t.table(outputRow -> {
+                outputRow.left();
+                outputRow.add("[lightgray]" + Core.bundle.get("stat.output") + ":[]").padRight(8);
+                for (ItemStack s : rec.outputItems)
+                    outputRow.add(StatValues.displayItem(s.item, s.amount, rec.craftTime, true)).padRight(8);
+                for (LiquidStack s : rec.outputLiquids)
+                    outputRow.add(StatValues.displayLiquid(s.liquid, s.amount * 60f, true)).padRight(8);
+                for (PayloadStack s : rec.cachedOutputPayloads)
+                    outputRow.table(pl -> {
+                        pl.image(s.item.uiIcon).size(32).padRight(2);
+                        pl.add(s.item.localizedName).color(Color.lightGray).padRight(4);
+                        pl.add(Strings.autoFixed(s.amount / (rec.craftTime / 60f), 1) + StatUnit.perSecond.localized()).color(Color.lightGray);
+                    }).padRight(8);
+                if (rec.outputPower > 0)
+                    outputRow.table(p -> StatValues.number(rec.outputPower * 60f, StatUnit.powerSecond).display(p)).padRight(8);
+                if (rec.outputHeat > 0)
+                    outputRow.table(h -> StatValues.number(rec.outputHeat, StatUnit.heatUnits).display(h)).padRight(8);
+
+                if (rec.randomResults != null) {
+                    float sum = 0f;
+                    for (ItemStack s : rec.randomResults) sum += s.amount;
+                    for (ItemStack stack : rec.randomResults) {
+                        int percent = (int)(stack.amount / sum * 100);
+                        outputRow.add(StatValues.displayItemPercent(stack.item, percent, true)).padRight(5);
+                    }
+                }
+            }).growX().pad(5).row();
+        }
+        t.row();
+
+        t.table(info -> {
+            info.left().defaults().left();
+            info.add("[lightgray]" + Core.bundle.get("stat.productiontime") + ":[] "
+                    + Strings.autoFixed(rec.craftTime / 60f, 3) + " "
+                    + Core.bundle.get("unit.seconds")).padTop(4);
+            if (rec.inputHeat > 0)
+                info.add("[lightgray] " + Core.bundle.get("stat.maxefficiency") + ": []"
+                        + Strings.autoFixed(rec.maxEfficiency * 100f, 0) + "%");
+        }).padTop(4).left().padLeft(4);
+
+        if (rec.attribute != null) {
+            t.row();
+            Table affTable = new Table();
+            StatValues.blocks(rec.attribute, rec.floating, rec.boostScale * size * size, !rec.displayEfficiency).display(affTable);
+            t.add(affTable).padLeft(4);
+        }
     }
 
     @Override
@@ -1847,8 +1868,6 @@ public class MultiCrafter extends HeatCrafter {
         public boolean scaleLiquidConsumption = false;
         public boolean displayEfficiency = true;
         public boolean floating = false;
-
-        public @Nullable String parent;
         public Seq<Objectives.Objective> objectives = new Seq<>();
         public @Nullable String databaseCategory;
         public @Nullable String databaseTag;
@@ -1856,8 +1875,11 @@ public class MultiCrafter extends HeatCrafter {
 
         public transient @Nullable Block unlockBlock;
         public @Nullable Boolean alwaysUnlocked;
-
-
+        public @Nullable Research research;
+        public static class Research {
+            public @Nullable String parent;
+            public @Nullable ItemStack[] requirements;
+        }
 
 
 
