@@ -376,7 +376,7 @@ public class MultiCrafter extends HeatCrafter {
         public RecipeBlock(String name, int recipeIndex) {
             super(name);
             this.recipeIndex = recipeIndex;
-
+            breakable = true;
             placeablePlayer = false;
             buildVisibility = BuildVisibility.shown;
             requirements = ItemStack.empty;
